@@ -33,12 +33,19 @@ exports.simpleDbFunction = functions.https.onRequest(async (_,res: any) => {
                   let DAYSTR = day.val();
                   let MONTHSTR = month.val();
                   let YEARSTR = year.val();
+                  const re1 = /\\/gi;
                   DAYSTR = DAYSTR.replace("[","");
                   DAYSTR = DAYSTR.replace("]","");
+                  DAYSTR = DAYSTR.replace(re,"");
+                  DAYSTR = DAYSTR.replace(re1,"");
                   MONTHSTR = MONTHSTR.replace("[","");
                   MONTHSTR = MONTHSTR.replace("]","");
+                  MONTHSTR = MONTHSTR.replace(re,"");
+                  MONTHSTR = MONTHSTR.replace(re1,"");
                   YEARSTR = YEARSTR.replace("[","");
                   YEARSTR = YEARSTR.replace("]","");
+                  YEARSTR = YEARSTR.replace(re,"");
+                  YEARSTR = YEARSTR.replace(re1,"");
                   const DAYARRAY = DAYSTR.split(",");
                   const MONTHARRAY = MONTHSTR.split(",");
                   const YEARARRAY = YEARSTR.split(",");
@@ -47,17 +54,26 @@ exports.simpleDbFunction = functions.https.onRequest(async (_,res: any) => {
                   let FULLDATESTR = "["
                   let DATEDUESTR = "["
                   for (let num1 = 0; num1 < DAYARRAY.length; num1 ++){
-                      const FULLDATE = (new Date(YEARARRAY[num1] + "-" + MONTHARRAY[num1] + "-" + DAYARRAY[num1] + "T00:00:00")).getTime()
-                      if((FULLDATE-CURRENTDATE)>2592000000){
-                        DATEDUEARRAY.push(DATEDUE.No);
-                      }
-                      else if(2592000000>=(FULLDATE-CURRENTDATE) && (FULLDATE-CURRENTDATE)>0){
-                        DATEDUEARRAY.push(DATEDUE.Soon);
-                      }
-                      else if((FULLDATE-CURRENTDATE)<=0){
-                        DATEDUEARRAY.push(DATEDUE.Yes);
-                      }
-                      FULLDATEARRAY.push(FULLDATE)
+                    let REALDAY = DAYARRAY[num1]
+                    let REALMONTH = MONTHARRAY[num1]
+                    const REALYEAR = YEARARRAY[num1]
+                    if(REALDAY.length === 1){
+                      REALDAY = "0" + REALDAY
+                    }
+                    if(REALMONTH.length === 1){
+                      REALMONTH = "0" + REALMONTH
+                    }
+                    const FULLDATE = (new Date(REALYEAR + "-" + REALMONTH + "-" + REALDAY + "T00:00:00")).getTime()
+                    if((FULLDATE-CURRENTDATE+31557600000)>2592000000){
+                      DATEDUEARRAY.push(DATEDUE.No);
+                    }
+                    else if(2592000000>=(FULLDATE-CURRENTDATE+31557600000) && (FULLDATE-CURRENTDATE+31557600000)>0){
+                      DATEDUEARRAY.push(DATEDUE.Soon);
+                    }
+                    else if((FULLDATE-CURRENTDATE+31557600000)<=0){
+                      DATEDUEARRAY.push(DATEDUE.Yes);
+                    }
+                    FULLDATEARRAY.push(FULLDATE)
                   }
                   for (const ADATE of FULLDATEARRAY){
                     FULLDATESTR = FULLDATESTR + `${ADATE}` + ","
@@ -70,7 +86,7 @@ exports.simpleDbFunction = functions.https.onRequest(async (_,res: any) => {
                   DATEDUESTR = DATEDUESTR.slice(0, -1);
                   DATEDUESTR += "]"
                   db.ref("/TechAuth20191016/" + `${USERNUM}`+ "FULLDATE").set(FULLDATESTR).catch(err => console.log(err));
-                  db.ref("/TechAuth20191016/" + `${USERNUM}`+ "DATEDUE").set(DATEDUESTR).then(res.send("no data")).catch(err => console.log(err));
+                  db.ref("/TechAuth20191016/" + `${USERNUM}`+ "DATEDUE").set(DATEDUESTR).then(res.send("SUCCESS")).catch(err => console.log(err));
                 }).catch(err => console.log(err));;
               }).catch(err => console.log(err));;
             }
