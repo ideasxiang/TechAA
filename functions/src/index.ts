@@ -4,6 +4,8 @@ admin.initializeApp();
 const db = admin.database();
 const ref = db.ref("/TechAuth20191016/ALLUSERS");
 
+// FIREBASE URL: https://us-central1-simpleappauthenticator.cloudfunctions.net/simpleDbFunction
+
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
 //
